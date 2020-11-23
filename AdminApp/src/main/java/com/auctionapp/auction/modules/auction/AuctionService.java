@@ -1,20 +1,21 @@
 package com.auctionapp.auction.modules.auction;
 
+import com.auctionapp.auction.modules.AES;
 import com.auctionapp.auction.modules.auction.entity.Auction;
 import com.auctionapp.auction.modules.bidder.BidderRepository;
 import com.auctionapp.auction.modules.bidder.BidderService;
 import com.auctionapp.auction.modules.bidder.entity.Bidder;
 import com.auctionapp.auction.modules.item.ItemRepository;
 import com.auctionapp.auction.modules.item.entity.Item;
+import com.auctionapp.auction.modules.pairs.PairsRepository;
+import com.auctionapp.auction.modules.pairs.entity.Pairs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.math.BigInteger;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,9 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final BidderRepository bidderRepository;
     private final ItemRepository itemRepository;
+    private final PairsRepository pairsRepository;
     private final BidderService bidderService;
-
+    static AES aes = new AES();
     ResponseEntity<?> addAuction(Map<String, String> auction) {
         int idItem = Integer.parseInt(auction.get("item"));
         Item item = itemRepository.findById(idItem).orElseThrow();
@@ -75,9 +77,9 @@ public class AuctionService {
             Auction auction = auctionRepository.findById(auctionId).orElseThrow();
             Bidder bidder = bidderRepository.findById(bidderId).orElseThrow();
             if (bidder.isInAuction()) {
-                return new ResponseEntity<String>("Selected bidder is already in auction", HttpStatus.OK);
+                return new ResponseEntity<>("Selected bidder is already in auction", HttpStatus.OK);
             } else if (auction.getAuctionersNumber() >= 5) {
-                return new ResponseEntity<String>("Auctionis overloaded", HttpStatus.OK);
+                return new ResponseEntity<>("Auctionis overloaded", HttpStatus.OK);
             } else {
                 auction.auctionersNumber++;
                 auction.biddersIds.add(bidderId);
@@ -102,6 +104,7 @@ public class AuctionService {
             }
             for (int i : ids) {
                 Bidder bidder = bidderRepository.findById(i).orElseThrow();
+                bidder.setValueOfBid(AES.decrypt(bidder.getValueOfBid(),bidder.getSurname()));
                 list.add(bidder);
             }
             return new ResponseEntity<>(list, HttpStatus.OK);
@@ -136,6 +139,55 @@ public class AuctionService {
         {
             return new ResponseEntity<>("Auction doesn't exist", HttpStatus.OK);
         }
+
+    }
+    ResponseEntity<?> auctionStart(int auctionId)
+    {
+    try{
+        Random random = new Random();
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow();
+        Bidder bidder;
+        List<Integer> list = auction.getBiddersIds();
+
+        for (Integer integer : list) {
+            String n = Integer.toString(random.nextInt((50 - 1) + 1) + 1);
+            bidder = bidderRepository.findById(integer).orElseThrow();
+            bidder.setValueOfBid(AES.encrypt(n, bidder.getSurname()));
+            bidderRepository.save(bidder);
+        }
+
+
+
+        Bidder firstBidder;
+        Bidder secondBidder;
+        for(int m =0;m<list.size();m++)
+        {
+            for(int k =0;k<list.size();k++)
+            {
+                if(m!=k && m<=k)
+                {
+                    firstBidder = bidderRepository.findById(list.get(m)).orElseThrow();
+                    secondBidder = bidderRepository.findById(list.get(k)).orElseThrow();
+                    millionaireProblem(firstBidder,secondBidder);
+                }
+            }
+        }
+
+
+        return new ResponseEntity<>("Auction started correctly",HttpStatus.OK);
+    }
+    catch(NoSuchElementException e)
+    {
+        return new ResponseEntity<>("Auction doesn't exist", HttpStatus.OK);
+    }
+    }
+    private void millionaireProblem(Bidder firstBidder, Bidder secondBidder) {
+//        Pairs firstBidderPairs = pairsRepository.findById(firstBidder.getBidderId()).orElseThrow(); //dostep do par pierwszego biddera
+//        Pairs secondBidderPairs = pairsRepository.findById(secondBidder.getBidderId()).orElseThrow(); // dostep do par drugiego biddera
+//        BigInteger firstBidderE = new BigInteger(firstBidderPairs.getE());
+//        BigInteger firstBidderD = new BigInteger(AES.decrypt(firstBidder.getPrivateKey(),firstBidder.getSurname()));
+//        BigInteger firstBidderN = new BigInteger(firstBidderPairs.getN());
+//        //tu jakas metoda obliczajaca dana wartosc czy petla
 
     }
 }

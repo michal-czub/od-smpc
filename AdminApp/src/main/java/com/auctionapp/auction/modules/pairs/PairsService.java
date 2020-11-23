@@ -1,6 +1,5 @@
 package com.auctionapp.auction.modules.pairs;
 
-import com.auctionapp.auction.modules.PrimeList;
 import com.auctionapp.auction.modules.bidder.entity.Bidder;
 
 import com.auctionapp.auction.modules.pairs.entity.Pairs;
@@ -16,7 +15,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 @Service
 public class PairsService {
-    private PrimeList primeList;
+
 
 
     private final PairsRepository pairsRepository;

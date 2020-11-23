@@ -17,11 +17,9 @@ public class Keys {
     BigInteger q;
     public Keys()
     {
-        this.p = BigInteger.probablePrime(5,random);
-        this.q = BigInteger.probablePrime(5,random);
-
+        this.p = BigInteger.probablePrime(10,random);
+        this.q = BigInteger.probablePrime(10,random);
         this.phi = (p.subtract(one)).multiply(q.subtract(one));
-
         this.n = p.multiply(q);
         this.publicKey = new BigInteger("467");
         this.privateKey = publicKey.modInverse(phi); //d = (publicKey^-1) * mod(phi)

@@ -18,13 +18,13 @@ public class Pairs {
 
 
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int e=0;
+    String e="";
 
 
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int n=0;
+    String n="";
 
-    public Pairs(int e, int n)
+    public Pairs(String e, String n)
     {
         this.e = e;
         this.n = n;

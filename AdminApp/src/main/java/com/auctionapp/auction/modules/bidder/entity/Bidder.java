@@ -16,13 +16,17 @@ public class Bidder
     public String surname;
 
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int d = 0;
+    String privateKey = "";
 
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     public boolean hasAlreadyBid = false;
     @GeneratedValue(strategy = GenerationType.AUTO)
     public boolean inAuction = false;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public String valueOfBid = "";
 
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    int wonMillionaireProblemCount = 0;
 
 }

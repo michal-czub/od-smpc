@@ -49,4 +49,9 @@ public class AuctionController {
     {
         return auctionService.removeBidderFromChosenAuction(auctionId,bidderId);
     }
+    @PostMapping("/start/{auctionId}")
+    ResponseEntity<?> startAuction(@PathVariable int auctionId)
+    {
+        return auctionService.auctionStart(auctionId);
+    }
 }

@@ -1,6 +1,8 @@
 package com.auctionapp.auction.modules.bidder;
 
-import com.auctionapp.auction.modules.PrimeList;
+import com.auctionapp.auction.modules.AES;
+import com.auctionapp.auction.modules.Keys;
+
 import com.auctionapp.auction.modules.bidder.entity.Bidder;
 import com.auctionapp.auction.modules.pairs.PairsRepository;
 import com.auctionapp.auction.modules.pairs.entity.Pairs;
@@ -11,27 +13,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Service
 public class BidderService {
-    public final PrimeList primeList = new PrimeList();
-    private final List<Integer> list = primeList.PrimeList();
+
     private final BidderRepository bidderRepository;
     private final PairsRepository pairsRepository;
-
+    AES aes = new AES();
     public Bidder addBidder(Bidder bidder) {
-        int p = PrimeList.getRandom(list);
-        int q = PrimeList.getRandom(list);
-        int phi = (p - 1) * (q - 1);
-        int n = p * q;
-        int e = primeList.E_gen(phi, p, q);
-        Pairs pairs = new Pairs(e, n);
+
+        Keys keys = new Keys();
+        Pairs pairs = new Pairs(keys.getE(), keys.getN());
         pairsRepository.save(pairs);
-        bidder.setD(primeList.D_gen(phi,p,q,e));
+        String encrypted = AES.encrypt(keys.getD(),bidder.getSurname());
+        bidder.setPrivateKey(encrypted);
         return bidderRepository.save(bidder);
+
+
     }
 
     public Iterable<Bidder> getBidders() {
@@ -56,6 +56,7 @@ public class BidderService {
             }
 
             bidderRepository.deleteById(id);
+            pairsRepository.deleteById(id);
             return new ResponseEntity<>("Bidder with ID: " + id + " was deleted", HttpStatus.OK);
         } catch (EmptyResultDataAccessException e) {
             return new ResponseEntity<>("Bidder with ID: " + id + " doesn't exist", HttpStatus.OK);
