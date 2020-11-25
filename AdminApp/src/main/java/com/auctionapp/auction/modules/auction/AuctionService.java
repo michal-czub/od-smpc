@@ -190,34 +190,17 @@ public class AuctionService {
         BigInteger firstBidderN = new BigInteger(firstBidderPairs.getN());
         // Alicia: private key - d
         BigInteger firstBidderD = new BigInteger(AES.decrypt(firstBidder.getPrivateKey(),firstBidder.getSurname()));
-
         // Alicia value: I
         BigInteger firstBidderValue = new BigInteger(AES.decrypt(firstBidder.getValueOfBid(), firstBidder.getSurname()));
         // Bob value: J
         BigInteger secondBidderValue = new BigInteger(AES.decrypt(secondBidder.getValueOfBid(), secondBidder.getSurname()));
-
         // MAX bid
         BigInteger MAX = new BigInteger("50");
-
-        System.out.println("Value of n:  " + firstBidderN);//todo delete
-        System.out.println("Value of e:  " + firstBidderE);//todo delete
-        System.out.println("Value of d:  " + firstBidderD);//todo delete
-        System.out.println("Alicia value:  " + firstBidderValue);//todo delete
-        System.out.println("Bob value:  " + secondBidderValue); //todo delete
-
-        // BOB ===============================================
         BigInteger X = new BigInteger("3220");
-        System.out.println("Value of X:  " + X);    //todo delete
 
-        BigInteger C;
-        C = X.modPow(firstBidderE, firstBidderN);
-        System.out.println("Value of C:  " + C);    //todo delete
-
+        BigInteger C = X.modPow(firstBidderE, firstBidderN);
         BigInteger m = C.subtract(secondBidderValue).add(BigInteger.ONE);
-        System.out.println("Value of m:  " + m);    //todo delete
-        // ==================================================
 
-        // ALICIA ===========================================
         // Alicia inserts MAX number of values to the list Y[]
         ArrayList<BigInteger> Y = new ArrayList<BigInteger>();
         for (BigInteger j = BigInteger.valueOf(0); j.compareTo(MAX) < 0; j = j.add(BigInteger.ONE))
@@ -236,25 +219,20 @@ public class AuctionService {
             BigInteger Pt = new BigInteger(7, 1, new Random());
             if (Pt.isProbablePrime(1))
             {
-                System.out.println("Value of P:  " + Pt);   //  todo delete
                 P = Pt;
                 break;
             }
         }
 
-        System.out.println("Bit length of P:  " + P.bitLength());   // todo delete
-
         for (BigInteger j = BigInteger.valueOf(0); j.compareTo(MAX) < 0; j = j.add(BigInteger.ONE))
         {
             Z.add(Y.get(j.intValue()).mod(P));
-            System.out.println(j.add(BigInteger.ONE) + "Value of Z[" + j + "]:  " + Z.get(j.intValue()));       // todo delete
         }
 
         ArrayList<BigInteger> W = new ArrayList<BigInteger>();
         for (BigInteger i = BigInteger.valueOf(0); i.compareTo(MAX) < 0; i = i.add(BigInteger.ONE))
         {
             int result = i.compareTo((firstBidderValue.subtract(BigInteger.ONE)));
-            System.out.println("Value of RESULT:  " + result);      // todo delete
             if (result >= 0)
             {
                 W.add((Z.get(i.intValue())).add(BigInteger.ONE));
@@ -263,8 +241,6 @@ public class AuctionService {
             {
                 W.add(Z.get(i.intValue()));
             }
-
-            System.out.println(i.add(BigInteger.ONE) + "Value of W[" + i + "]:  " + W.get(i.intValue())); // todo delete
         }
 
         // BOB ===========================================================
@@ -274,12 +250,10 @@ public class AuctionService {
         //================================================================
 
         BigInteger G = X.mod(P);
-        System.out.println("Value of G:  " + G);    // todo delete
 
         int result = G.compareTo(W.get(secondBidderValue.intValue()-1));
         if (result == 0)
         {
-            System.out.println("Alicia bidded more (or same)!");// todo delete
             firstBidder.setWonMillionaireProblemCount(firstBidder.getWonMillionaireProblemCount()+1);
             bidderRepository.save(firstBidder);
         }
